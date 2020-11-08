@@ -1,7 +1,7 @@
 package kv
 
 import (
-	"../history"
+	"github.com/billopark/cs492a/hw1/history"
 	"fmt"
 	"errors"
 	"io/ioutil"
