@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./kv"
+	"github.com/billopark/cs492a/hw1/kv"
 	"fmt"
 	"os"
 )
