@@ -14,6 +14,10 @@ func Hash(blockID int) (string, error) {
 	var err error
 
 	// TODO: Get hash value of taken blockID
+	if blockID == 0 {
+		return ret, err
+	}
+
 	f, err := os.Open("history.block." + strconv.Itoa(blockID))
 	if err != nil {
 		return ret, err
