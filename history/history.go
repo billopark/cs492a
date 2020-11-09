@@ -17,9 +17,13 @@ func (h *History) Append(tx string) error {
 	var err error
 
 	// TODO: store tx into h.txs
+	h.txs[h.currentTxId] = tx
+	h.currentTxId++
 
 	// TODO: write h.txs if h.currentTxId >len(h.txs)
-
+	if h.currentTxId >= len(h.txs) {
+		err = h.Write()
+	}
 	return err
 }
 
@@ -60,9 +64,13 @@ func (h *History) Write() error {
 	var err error
 
 	// TODO: Write the hash value of previous block
-	//blockPath := "history.block." + strconv.Itoa(h.currentBlockId)
-	//hashValue, err := hash.Hash(h.currentBlockId - 1)
-	//s := ""
-	//err = ioutil.WriteFile(blockPath, []byte(s), 0644)
+	blockPath := "history.block." + strconv.Itoa(h.currentBlockId)
+	hashValue, err := hash.Hash(h.currentBlockId - 1)
+	if err != nil {
+		return err
+	}
+
+	s := strings.Join(append([]string{hashValue}, h.txs[:h.currentTxId]...), "\n")
+	err = ioutil.WriteFile(blockPath, []byte(s), 0644)
 	return err
 }
