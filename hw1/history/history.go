@@ -1,7 +1,7 @@
 package history
 
 import (
-	"github.com/billopark/cs492a/hw1/hash"
+	"../hash"
 	"io/ioutil"
 	"strconv"
 	"strings"
