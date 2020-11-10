@@ -75,7 +75,8 @@ func (h *History) Write() error {
 		return err
 	}
 
-	s := strings.Join(append([]string{hashValue}, h.txs[:h.currentTxId]...), "\n")
+	s := strings.Join(append([]string{hashValue}, h.txs[:]...), "\n")
+	s = s + "\n"
 	err = ioutil.WriteFile(blockPath, []byte(s), 0644)
 	return err
 }
