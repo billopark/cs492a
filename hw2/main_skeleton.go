@@ -13,23 +13,23 @@ type CC struct {
 
 func (c *CC) Init(stub shim.ChaincodeStubInterface) peer.Response {
 	// TODO: initialize states of a, b, c, d, bank
-	err := stub.PutState("a", []byte(strconv.Itoa(100)))
+	err := stub.PutState("a", []byte("100"))
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	err = stub.PutState("b", []byte(strconv.Itoa(100)))
+	err = stub.PutState("b", []byte("100"))
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	err = stub.PutState("c", []byte(strconv.Itoa(100)))
+	err = stub.PutState("c", []byte("100"))
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	err = stub.PutState("d", []byte(strconv.Itoa(100)))
+	err = stub.PutState("d", []byte("100"))
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	err = stub.PutState("bank", []byte(strconv.Itoa(1000)))
+	err = stub.PutState("bank", []byte("1000"))
 	if err != nil {
 		return shim.Error(err.Error())
 	}
