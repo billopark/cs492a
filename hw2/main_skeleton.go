@@ -13,7 +13,27 @@ type CC struct {
 
 func (c *CC) Init(stub shim.ChaincodeStubInterface) peer.Response {
 	// TODO: initialize states of a, b, c, d, bank
-	
+	err := stub.PutState("a", []byte("100"))
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	err = stub.PutState("b", []byte("100"))
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	err = stub.PutState("c", []byte("100"))
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	err = stub.PutState("d", []byte("100"))
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	err = stub.PutState("bank", []byte("1000"))
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
 	return shim.Success([]byte("OK"))
 }
 
@@ -66,10 +86,52 @@ func (c *CC) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		return shim.Success([]byte(args[0] + ":" + aValUpdatedByte + ", " + args[1] + ":" + bValUpdatedByte))
 	case "withdraw":
 		// TODO: Implement a withdraw function, e.g., {withdraw a 20 0.05}.
+		money, err := strconv.ParseFloat(args[1], 64)
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+		fee, err := strconv.ParseFloat(args[2], 64)
+		if err != nil {
+			return shim.Error(err.Error())
+		}
 
+		aValByte, err := stub.GetState(args[0])
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+		bankValByte, err := stub.GetState("bank")
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
+		aVal, err := strconv.ParseFloat(string(aValByte), 64)
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+		bankVal, err := strconv.ParseFloat(string(bankValByte), 64)
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
+		aVal -= money * (1 + fee)
+		bankVal += money * fee
+
+		if aVal <0 {
+			return shim.Error(errors.New("NON-POSITIVE BALANCE").Error())
+		}
+
+		aValUpdatedByte := fmt.Sprintf("%f", aVal)
+		bankValUpdatedByte := fmt.Sprintf("%f", bankVal)
+
+		if err = stub.PutState(args[0], []byte(aValUpdatedByte)); err != nil {
+			return shim.Error(err.Error())
+		}
+		if err = stub.PutState("bank", []byte(bankValUpdatedByte)); err != nil {
+			return shim.Error(err.Error())
+		}
 
 		// TODO: For the below return statement, you should replace ?? with your variable names.
-		// return shim.Success([]byte(args[0] + ":" + ?? + ", " + "bank" + ":" + ??))
+		return shim.Success([]byte(args[0] + ":" + aValUpdatedByte + ", " + "bank" + ":" + bankValUpdatedByte))
 	}
 	return shim.Error("No function is supported for " + f)
 }
