@@ -64,6 +64,11 @@ func (h *History) Write() error {
 	var err error
 
 	// TODO: Write the hash value of previous block
+	// currentTxId가 0이면 저장할 필요 없음
+	if h.currentTxId == 0 {
+		return nil
+	}
+
 	blockPath := "history.block." + strconv.Itoa(h.currentBlockId)
 	hashValue, err := hash.Hash(h.currentBlockId - 1)
 	if err != nil {
