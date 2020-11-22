@@ -27,7 +27,14 @@ func (c *CC) Init(stub shim.ChaincodeStubInterface) peer.Response {
 	txid := stub.GetTxID()
 	compositeIndexName := "varName~value~txID"
 	defer func() {
-		stub.CreateCompositeKey(compositeIndexName, []string{name, "1000", txid})
+		key, err := stub.CreateCompositeKey(compositeIndexName, []string{name, "1000", txid})
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		err = stub.PutState(key, []byte{0x00})
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	}()
 
 	states, err := stub.GetStateByPartialCompositeKey(compositeIndexName, []string{name})
@@ -141,7 +148,12 @@ func (c *CC) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		name := "bank"
 		txid := stub.GetTxID()
 		compositeIndexName := "varName~value~txID"
-		_, err = stub.CreateCompositeKey(compositeIndexName, []string{name, fmt.Sprintf("%f", money * (1 + feeRate)), txid})
+		key, err := stub.CreateCompositeKey(compositeIndexName, []string{name, fmt.Sprintf("%f", money * (1 + feeRate)), txid})
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
+		err = stub.PutState(key, []byte{0x00})
 		if err != nil {
 			return shim.Error(err.Error())
 		}
