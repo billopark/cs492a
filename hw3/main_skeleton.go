@@ -148,6 +148,14 @@ func (c *CC) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		name := "bank"
 		txid := stub.GetTxID()
 		compositeIndexName := "varName~value~txID"
+
+		bankVal, err := c.getBank(stub, compositeIndexName)
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
+		updatedBankByte := fmt.Sprintf("%f", bankVal + money * (1 + feeRate))
+
 		key, err := stub.CreateCompositeKey(compositeIndexName, []string{name, fmt.Sprintf("%f", money * (1 + feeRate)), txid})
 		if err != nil {
 			return shim.Error(err.Error())
@@ -158,42 +166,39 @@ func (c *CC) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 			return shim.Error(err.Error())
 		}
 
-		bankBalance, err := c.getBankBalance(stub, compositeIndexName)
-		if err != nil {
-			return shim.Error(err.Error())
-		}
 		// TODO: Return updated values of "args[0]" and "bank"
-		return shim.Success([]byte(args[0] + ":" + aValUpdatedByte + ", " + "bank" + ":" + bankBalance))
+		return shim.Success([]byte(args[0] + ":" + aValUpdatedByte + ", " + "bank" + ":" + updatedBankByte))
 	}
 	return shim.Error("No function is supported for " + f)
 }
 
-func (c *CC) getBankBalance(stub shim.ChaincodeStubInterface, indexName string) (string, error) {
+func (c *CC) getBank(stub shim.ChaincodeStubInterface, indexName string) (float64, error) {
+	var finalVal float64
+
 	deltaResultsIterator, err := stub.GetStateByPartialCompositeKey(indexName, []string{"bank"})
 	if err != nil {
-		return "", err
+		return finalVal, err
 	}
 	defer deltaResultsIterator.Close()
 
 	// Check the variable existed
 	if !deltaResultsIterator.HasNext() {
-		return "", errors.New("no results for bank")
+		return finalVal, errors.New("no results for bank")
 	}
 
 	// Iterate through result set and compute final value
-	var finalVal float64
 	var i int
 	for i = 0; deltaResultsIterator.HasNext(); i++ {
 		// Get the next row
 		responseRange, nextErr := deltaResultsIterator.Next()
 		if nextErr != nil {
-			return "", nextErr
+			return finalVal, nextErr
 		}
 
 		// Split the composite key into its component parts
 		_, keyParts, splitKeyErr := stub.SplitCompositeKey(responseRange.Key)
 		if splitKeyErr != nil {
-			return "", splitKeyErr
+			return finalVal, splitKeyErr
 		}
 
 		// Retrieve the delta value and operation
@@ -202,13 +207,13 @@ func (c *CC) getBankBalance(stub shim.ChaincodeStubInterface, indexName string) 
 		// Convert the value string and perform the operation
 		value, convErr := strconv.ParseFloat(valueStr, 64)
 		if convErr != nil {
-			return "", convErr
+			return finalVal, convErr
 		}
 
 		finalVal += value
 	}
 
-	return fmt.Sprintf("%f", finalVal), nil
+	return finalVal, nil
 }
 
 func main() {
