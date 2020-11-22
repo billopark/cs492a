@@ -154,9 +154,9 @@ func (c *CC) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 			return shim.Error(err.Error())
 		}
 
-		updatedBankStr := fmt.Sprintf("%f", bankVal + money * (1 + feeRate))
+		updatedBankStr := fmt.Sprintf("%f", bankVal + money * feeRate)
 
-		key, err := stub.CreateCompositeKey(compositeIndexName, []string{name, fmt.Sprintf("%f", money * (1 + feeRate)), txid})
+		key, err := stub.CreateCompositeKey(compositeIndexName, []string{name, fmt.Sprintf("%f", money * feeRate), txid})
 		if err != nil {
 			return shim.Error(err.Error())
 		}
