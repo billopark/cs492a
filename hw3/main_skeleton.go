@@ -154,7 +154,7 @@ func (c *CC) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 			return shim.Error(err.Error())
 		}
 
-		updatedBankByte := fmt.Sprintf("%f", bankVal + money * (1 + feeRate))
+		updatedBankStr := fmt.Sprintf("%f", bankVal + money * (1 + feeRate))
 
 		key, err := stub.CreateCompositeKey(compositeIndexName, []string{name, fmt.Sprintf("%f", money * (1 + feeRate)), txid})
 		if err != nil {
@@ -167,7 +167,7 @@ func (c *CC) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		}
 
 		// TODO: Return updated values of "args[0]" and "bank"
-		return shim.Success([]byte(args[0] + ":" + aValUpdatedByte + ", " + "bank" + ":" + updatedBankByte))
+		return shim.Success([]byte(args[0] + ":" + aValUpdatedByte + ", " + "bank" + ":" + updatedBankStr))
 	}
 	return shim.Error("No function is supported for " + f)
 }
